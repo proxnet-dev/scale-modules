@@ -4,9 +4,6 @@ import path from "node:path";
 
 let log = new Logging('Modules');
 
-// temporary, please remove
-const config = {}; config.verboseImport = true;
-
 class Module {
     /**
      * Create a module.
@@ -78,7 +75,6 @@ class DynamicImport {
             files.forEach((value, i, array) => {
                 if (value.endsWith('.mjs')) validFiles.push(value); // If it's a valid module, push it to the array
             });
-            if (config.verboseImport) log.info(`Importing files ${JSON.stringify(validFiles)} from '${dir}'`);
 
             validFiles.forEach(async (value, i, array) => {
 
@@ -86,16 +82,16 @@ class DynamicImport {
 
                 // Invalid module checks
                 if (typeof modTempObject.default == 'undefined') {
-                    if (config.verboseImport) log.warn(`Module '${value}' does not contain a default export, skipping.`);
+                    log.warn(`Module '${value}' does not contain a default export, skipping.`);
                     return;
                 }
                 if (typeof modTempObject.default.moduleName == 'undefined') {
-                    if (config.verboseImport) log.warn(`Module '${value}' does not export the default property 'moduleName', skipping.`);
+                    log.warn(`Module '${value}' does not export the default property 'moduleName', skipping.`);
                     return;
                 }
                 const tempModuleName = modTempObject.default.moduleName;
                 if (modules.includes(tempModuleName)) {
-                    if (config.verboseImport) log.warn(`Module '${tempModuleName}' (${value}) conflicts with another module, skipping.`);
+                    log.warn(`Module '${tempModuleName}' (${value}) conflicts with another module, skipping.`);
                     return;
                 } else {
                     modules.push(tempModuleName); // Used to prevent importing modules with names that conflict with each other
@@ -103,16 +99,16 @@ class DynamicImport {
 
                 objs[tempModuleName] = modTempObject;
                 if (typeof modTempObject !== 'object') {
-                    if (config.verboseImport) log.warn(`Default export for module '${tempModuleName}' (${value}) has a non-standard type.`);
+                    log.warn(`Default export for module '${tempModuleName}' (${value}) has a non-standard type.`);
                 } else {
                     if (typeof modTempObject.default.exec == 'undefined') {
-                        if (config.verboseImport) log.warn(`Module '${tempModuleName}' (${value}) does not export the default function 'exec'.`);
+                        log.warn(`Module '${tempModuleName}' (${value}) does not export the default function 'exec'.`);
                     } else {
                         try {
                             modTempObject.default.exec(); // Call the module default execution function. Can be either asynchronous or synchronous.
                         } catch (err) {
                             log.error(`Module '${tempModuleName}' (${value}) crashed. Stack:\n${err.stack}`); 
-                            // This is called only for synchronous execution functions. Async exec functions that aren't wrapped in a trycatch will kill the process.
+                            // This is called only for synchronous execution functions. Async exec functions that aren't wrapped in a try-catch will stop the process.
                         }
                     }
                 }
