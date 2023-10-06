@@ -1,0 +1,9 @@
+{
+  "name": "scale-modules",
+  "version": "1.2.0",
+  "description": "Construct modules designed for proxnet-scale",
+  "type": "module",
+  "main": "module.mjs",
+  "author": "@ZombieBrine13092 on GitHub, @zombieb on Discord",
+  "license": "ISC"
+}
