@@ -1,6 +1,7 @@
 import Logging from "scale-logging";
 import * as fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 
 let log = new Logging('Modules');
 
@@ -60,6 +61,10 @@ class DynamicImport {
         let modules = [];
         let objs = {};
         let searchdir = path.join(process.cwd(), dir);
+        let compatSearchDir = searchdir;
+        // Windows import compatibility
+        if (os.type == 'Windows_NT') compatSearchDir = 'file://' + searchdir
+
         fs.readdir(searchdir, (err, files) => {
 
             if (err) {
@@ -78,7 +83,7 @@ class DynamicImport {
 
             validFiles.forEach(async (value, i, array) => {
 
-                let modTempObject = await import(searchdir + value);
+                let modTempObject = await import(compatSearchDir + value);
 
                 // Invalid module checks
                 if (typeof modTempObject.default == 'undefined') {
